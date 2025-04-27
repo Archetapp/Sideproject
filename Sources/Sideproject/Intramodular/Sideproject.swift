@@ -169,7 +169,7 @@ extension Sideproject {
             let service: _MIServiceTypeIdentifier = try account.accountType.__conversion()
             
             return _AnyMIServiceAccount(
-                serviceIdentifier: service,
+                serviceVendorIdentifier: service,
                 credential: credential
             )
         }
@@ -203,7 +203,7 @@ extension Sideproject {
             .compactMap({ $0 })
         
         // FIXME: Ollama is special-cased.
-        if let ollama = try await serviceTypes.firstAndOnly(byUnwrapping: { try? await $0.init(account: _AnyMIServiceAccount(serviceIdentifier: ._Ollama, credential: nil)) }) {
+        if let ollama = try await serviceTypes.firstAndOnly(byUnwrapping: { try? await $0.init(account: _AnyMIServiceAccount(serviceVendorIdentifier: ._Ollama, credential: nil)) }) {
             result += ollama
         }
         
