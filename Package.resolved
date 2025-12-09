@@ -1,0 +1,141 @@
+{
+  "originHash" : "c7a1bb12baaa520f9cc98a8e013e9bf18b6c8cb3e7d818b3bd9458907fa6d16c",
+  "pins" : [
+    {
+      "identity" : "ai",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PreternaturalAI/AI.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "4021a8f960476cebf51f5daf31483fd9d6f0452a"
+      }
+    },
+    {
+      "identity" : "browserkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/BrowserKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "2d20df8329f18f972fa486c936b617e15d1b4f57"
+      }
+    },
+    {
+      "identity" : "chatkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PreternaturalAI/ChatKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "055ad6219fc87355b25ecdcb5eb4cbb1c6f51177"
+      }
+    },
+    {
+      "identity" : "corepersistence",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/CorePersistence.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "2a34aac9103bc1885243f26411143069d55cfa25"
+      }
+    },
+    {
+      "identity" : "merge",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/Merge.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "1638aa70e6f3dc3d29a622bdb4699f4cd1f9b26a"
+      }
+    },
+    {
+      "identity" : "networkkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/NetworkKit.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "470af0276c2aa6e61acff22acc14c7ca30b99cbc"
+      }
+    },
+    {
+      "identity" : "swallow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/Swallow.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "8145fd14a4389e12eeecaf7eb614c245ebcd160c"
+      }
+    },
+    {
+      "identity" : "swift-atomics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-atomics.git",
+      "state" : {
+        "revision" : "cd142fd2f64be2100422d658e7411e39489da985",
+        "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections",
+      "state" : {
+        "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
+        "version" : "1.1.4"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-precompiled/swift-syntax",
+      "state" : {
+        "branch" : "release/6.1",
+        "revision" : "fc197a24fb2e77609fbe3d94624e36f84d758099"
+      }
+    },
+    {
+      "identity" : "swiftapi",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vmanot/SwiftAPI.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "3e47cc5f9b0cefe9ed1d0971aff22583bd9ac7b0"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "0e96a20ffd37a515c5c963952d4335c89bed50a6",
+        "version" : "2.6.0"
+      }
+    },
+    {
+      "identity" : "swiftui-introspect",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/siteline/SwiftUI-Introspect.git",
+      "state" : {
+        "revision" : "807f73ce09a9b9723f12385e592b4e0aaebd3336",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swiftuix",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftUIX/SwiftUIX.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "169e13efaae28d81a217b3a71601850cb91037ca"
+      }
+    },
+    {
+      "identity" : "swiftuiz",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftUIX/SwiftUIZ.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "3b1eb4815906955142c213b9f3e9825585d6d38c"
+      }
+    }
+  ],
+  "version" : 3
+}

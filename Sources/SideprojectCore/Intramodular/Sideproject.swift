@@ -25,25 +25,13 @@ extension Sideproject {
 ///
 /// `Sideproject` may also decide which provider is the best one to handle your task. For example, if you've added both OpenAI and Anthropic services, and you try and send it a prompt exceeding 128K tokens (something that OpenAI can't handle at the moment), it'll use Anthropic's Claude to handle that. Or for e.g. if you've added multiple OpenAI accounts, and one of them has access to GPT-4 and the other doesn't, if your LLM task request specifies that the model used must be GPT-4 then it'll pick the account that has access.
 public final class Sideproject: _CancellablesProviding, Logging, ObservableObject {
-    @_StaticMirrorQuery(
-        #metatype((any CoreMI._ServiceClientProtocol).self),
-        .nonAppleFramework
-    )
-    internal static var serviceTypes: [any CoreMI._ServiceClientProtocol.Type]
-   
-    @_StaticMirrorQuery(
-        #metatype((any Sideproject.ExternalAccountTypeDescriptor).self),
-        .nonAppleFramework
-    )
-    internal static var externalAccountTypeDescriptorTypes: [any Sideproject.ExternalAccountTypeDescriptor.Type]
-    
     private let queue = TaskQueue()
     
     private var shouldAutoinitializeServices: Bool
-    private var autodiscoveredServiceAccounts: [CoreMI._AnyServiceAccount] = []
-    
+    private var autodiscoveredServiceAccounts: [_AnyMIServiceAccount] = []
+
     @MainActor
-    @Published private var autoinitializedServices: [any CoreMI._ServiceClientProtocol]? = nil {
+    @Published private var autoinitializedServices: [any _MIService]? = nil {
         didSet {
             if let newValue = autoinitializedServices {
                 logger.info("Auto-initialized \(newValue.count) service(s).")
@@ -52,11 +40,11 @@ public final class Sideproject: _CancellablesProviding, Logging, ObservableObjec
     }
     
     @MainActor
-    @Published private var manuallyAddedServices: [any CoreMI._ServiceClientProtocol] = []
+    @Published private var manuallyAddedServices: [any _MIService] = []
     
     // @Published public var modelIdentifierScope: ModelIdentifierScope?
     
-    public var services: [any CoreMI._ServiceClientProtocol] {
+    public var services: [any _MIService] {
         get async throws {
             await self.queue.perform {
                 await _populateAutoinitializedServicesIfNecessary()
@@ -66,16 +54,12 @@ public final class Sideproject: _CancellablesProviding, Logging, ObservableObjec
         }
     }
     
-    public init(
-        services: [any CoreMI._ServiceClientProtocol]?
-    ) {
+    public init(services: [any _MIService]?) {
         if services != nil {
             shouldAutoinitializeServices = false
         } else {
             shouldAutoinitializeServices = true
         }
-        
-        _ = Self.serviceTypes
         
         MainActor.unsafeAssumeIsolated {
             if let services {
@@ -91,15 +75,13 @@ public final class Sideproject: _CancellablesProviding, Logging, ObservableObjec
     }
     
     @MainActor
-    public func add(
-        _ service: some CoreMI._ServiceClientProtocol
-    ) {
+    public func add(_ service: some _MIService) {
         self.manuallyAddedServices.append(service)
     }
     
     @MainActor
     private func setUp() {
-        queue.addTask(priority: .high) {
+        queue.addTask(priority: .userInitiated) {
             await self._populateAutoinitializedServicesIfNecessary()
         }
         
@@ -108,7 +90,7 @@ public final class Sideproject: _CancellablesProviding, Logging, ObservableObjec
                 return
             }
             
-            queue.addTask(priority: .high) {
+            queue.addTask(priority: .userInitiated) {
                 self.shouldAutoinitializeServices = true
                 
                 await self._populateAutoinitializedServicesIfNecessary()
@@ -151,16 +133,16 @@ extension Sideproject {
         }
         
         self.logger.debug("Discovering services to auto-intialize.")
-        
+                        
         do {
-            let oldAccounts: [CoreMI._AnyServiceAccount] = self.autodiscoveredServiceAccounts
+            let oldAccounts = self.autodiscoveredServiceAccounts
             let newAccounts = try self._serviceAccounts()
-            
+
             guard oldAccounts != newAccounts else {
                 return
             }
-            
-            let services: [any CoreMI._ServiceClientProtocol] = try await self._makeServices(forAccounts: newAccounts)
+                        
+            let services: [any _MIService] = try await self._makeServices(forAccounts: newAccounts)
             
             self.autodiscoveredServiceAccounts = newAccounts
             self.autoinitializedServices = services
@@ -177,33 +159,32 @@ extension Sideproject {
     
     /// Converts Sideproject accounts loaded from Sideproject's managed account store to CoreMI accounts.
     @MainActor
-    private func _serviceAccounts() throws -> [CoreMI._AnyServiceAccount] {
+    private func _serviceAccounts() throws -> [_AnyMIServiceAccount] {
         let allAccounts: IdentifierIndexingArrayOf<Sideproject.ExternalAccount> = Sideproject.ExternalAccountStore.shared.accounts + (Sideproject.ExternalAccountStore.shared._testAccounts ?? [])
         
         return try allAccounts.compactMap { (account: Sideproject.ExternalAccount) in
-            let credential = CoreMI._ServiceCredentialTypes.APIKeyCredential (
+            let credential = _MIServiceAPIKeyCredential(
                 apiKey: (account.credential as! Sideproject.ExternalAccountCredentialTypes.APIKey).key
             )
+            let service: _MIServiceTypeIdentifier = try account.accountType.__conversion()
             
-            let service: CoreMI._ServiceVendorIdentifier = try account.accountType.__conversion()
-            
-            return CoreMI._AnyServiceAccount(
+            return _AnyMIServiceAccount(
                 serviceVendorIdentifier: service,
                 credential: credential
             )
         }
     }
-    
-    /// Initializes all CoreMI services that can be initialized using the loaded Sideproject accounts.
-    @_NotMainActor
-    private func _makeServices(
-        forAccounts serviceAccounts: [CoreMI._AnyServiceAccount]
-    ) async throws -> [any CoreMI._ServiceClientProtocol] {
-        let serviceTypes = Sideproject.serviceTypes
         
-        var result: [any CoreMI._ServiceClientProtocol] = await serviceAccounts
-            .asyncMap { (account: CoreMI._AnyServiceAccount) in
-                await serviceTypes.first(byUnwrapping: { type -> (any CoreMI._ServiceClientProtocol)? in
+    /// Initializes all CoreMI services that can be initialized using the loaded Sideproject accounts.
+    private func _makeServices(
+        forAccounts serviceAccounts: [_AnyMIServiceAccount]
+    ) async throws -> [any _MIService] {
+        @_StaticMirrorQuery(type: (any _MIService).self)
+        var serviceTypes: [any _MIService.Type]
+
+        var result: [any _MIService] = await serviceAccounts
+            .asyncMap { account in
+                await serviceTypes.first(byUnwrapping: { type -> (any _MIService)? in
                     do {
                         return try await type.init(account: account)
                     } catch {
@@ -222,7 +203,7 @@ extension Sideproject {
             .compactMap({ $0 })
         
         // FIXME: Ollama is special-cased.
-        if let ollama = try await serviceTypes.firstAndOnly(byUnwrapping: { try? await $0.init(account: CoreMI._AnyServiceAccount(serviceVendorIdentifier: ._Ollama, credential: nil)) }) {
+        if let ollama = try await serviceTypes.firstAndOnly(byUnwrapping: { try? await $0.init(account: _AnyMIServiceAccount(serviceVendorIdentifier: ._Ollama, credential: nil)) }) {
             result += ollama
         }
         
@@ -240,21 +221,15 @@ extension Sideproject {
     }
 }
 
-extension Sideproject.ExternalAccountTypeIdentifier: CoreMI._ServiceVendorIdentifierConvertible {
-    public func __conversion() throws -> CoreMI._ServiceVendorIdentifier {
+extension Sideproject.ExternalAccountTypeIdentifier: _MIServiceTypeIdentifierConvertible {
+    public func __conversion() throws -> _MIServiceTypeIdentifier {
         switch self {
             case Sideproject.ExternalAccountTypeDescriptors.Anthropic().accountType:
                 return ._Anthropic
-            case Sideproject.ExternalAccountTypeDescriptors.ElevenLabs().accountType:
-                return ._ElevenLabs
             case Sideproject.ExternalAccountTypeDescriptors.FalAI().accountType:
                 return ._Fal
-            case Sideproject.ExternalAccountTypeDescriptors.Groq().accountType:
-                return ._Groq
             case Sideproject.ExternalAccountTypeDescriptors.HuggingFace().accountType:
                 return ._HuggingFace
-            case Sideproject.ExternalAccountTypeDescriptors.HumeAI().accountType:
-                return ._HumeAI
             case Sideproject.ExternalAccountTypeDescriptors.Mistral().accountType:
                 return ._Mistral
             case Sideproject.ExternalAccountTypeDescriptors.OpenAI().accountType:
@@ -263,12 +238,10 @@ extension Sideproject.ExternalAccountTypeIdentifier: CoreMI._ServiceVendorIdenti
                 return ._Perplexity
             case Sideproject.ExternalAccountTypeDescriptors.Replicate().accountType:
                 return ._Replicate
-            case Sideproject.ExternalAccountTypeDescriptors.PlayHT().accountType:
-                return ._PlayHT
-            case Sideproject.ExternalAccountTypeDescriptors.NeetsAI().accountType:
-                return ._NeetsAI
-            case Sideproject.ExternalAccountTypeDescriptors.Rime().accountType:
-                return ._Rime
+            case Sideproject.ExternalAccountTypeDescriptors.Groq().accountType:
+                return ._Groq
+            case Sideproject.ExternalAccountTypeDescriptors.ElevenLabs().accountType:
+                return ._ElevenLabs
             default:
                 throw Never.Reason.unexpected
         }
