@@ -11,6 +11,9 @@ import SwiftUIX
 
 extension Sideproject {
     public static let shared = Sideproject()
+
+    @_StaticMirrorQuery(type: (any Sideproject.ExternalAccountTypeDescriptor).self)
+    public static var externalAccountTypeDescriptorTypes: [any Sideproject.ExternalAccountTypeDescriptor.Type]
 }
 
 /// `Sideproject` is a utility class that bundles a set of services.
