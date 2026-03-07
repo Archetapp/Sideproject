@@ -487,6 +487,28 @@ extension Sideproject.ExternalAccountTypeDescriptors {
         }
     }
     
+    public struct Google: Sideproject.ExternalAccountTypeDescriptor, _StaticInstance {
+        public var accountType: Sideproject.ExternalAccountTypeIdentifier {
+            "com.vmanot.google"
+        }
+
+        public var credentialType: any Sideproject.ExternalAccountCredential.Type {
+            Sideproject.ExternalAccountCredentialTypes.APIKey.self
+        }
+
+        public var icon: Image? {
+            Image("logo/Google", bundle: .module)
+        }
+
+        public var title: String {
+            "Google"
+        }
+
+        public init() {
+
+        }
+    }
+
     @HadeanIdentifier("jahov-batom-ruhof-fubom")
     public struct xAI: Sideproject.ExternalAccountTypeDescriptor, _StaticInstance {
         public var accountType: Sideproject.ExternalAccountTypeIdentifier {
@@ -629,6 +651,12 @@ extension Sideproject.ExternalAccountTypeDescriptor where Self == Sideproject.Ex
 
 extension Sideproject.ExternalAccountTypeDescriptor where Self == Sideproject.ExternalAccountTypeDescriptors.NeetsAI {
     public static var neetsAI: Self {
+        Self()
+    }
+}
+
+extension Sideproject.ExternalAccountTypeDescriptor where Self == Sideproject.ExternalAccountTypeDescriptors.Google {
+    public static var google: Self {
         Self()
     }
 }
